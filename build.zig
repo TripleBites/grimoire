@@ -54,8 +54,8 @@ fn addApps(
     const neuro_dep = b.dependency("neuro", .{ .target = target, .optimize = optimize });
     const zag_dep = b.dependency("zag", .{ .target = target, .optimize = optimize });
 
-    addApp(b, target, optimize, tag, "grimoire", "apps/grimoire/grimoire.zig", neuro_dep, zag_dep);
-    addApp(b, target, optimize, tag, "sandbox", "apps/sandbox/sandbox.zig", neuro_dep, zag_dep);
+    addApp(b, target, optimize, tag, "grimoire", "apps/grimoire/src/grimoire.zig", neuro_dep, zag_dep);
+    addApp(b, target, optimize, tag, "sandbox", "apps/sandbox/src/sandbox.zig", neuro_dep, zag_dep);
 }
 
 /// Adds both apps for a *cross* target; each installed artifact is also
@@ -71,8 +71,8 @@ fn addCrossApps(
     const zag_dep = b.dependency("zag", .{ .target = target, .optimize = optimize });
 
     const apps = [_]struct { name: []const u8, src: []const u8 }{
-        .{ .name = "grimoire", .src = "apps/grimoire/grimoire.zig" },
-        .{ .name = "sandbox", .src = "apps/sandbox/sandbox.zig" },
+        .{ .name = "grimoire", .src = "apps/grimoire/src/grimoire.zig" },
+        .{ .name = "sandbox", .src = "apps/sandbox/src/sandbox.zig" },
     };
 
     for (apps) |app| {
@@ -100,7 +100,11 @@ fn addApp(
 
     if (tag == null) {
         const run = b.addRunArtifact(exe);
-        if (b.args) |args| run.addArgs(args);
+        if (@hasField(std.Build, "args")) {
+            if (b.args) |args| run.addArgs(args);
+        } else {
+            run.addPassthruArgs();
+        }
         const run_step = b.step(
             b.fmt("run-{s}", .{name}),
             b.fmt("Run the {s} app", .{name}),
@@ -125,13 +129,17 @@ fn buildExe(
     else
         name;
 
-    const exe = b.addExecutable(.{
-        .name = full_name,
+    const exe_mod = b.createModule(.{
         .root_source_file = b.path(src),
         .target = target,
         .optimize = optimize,
     });
-    exe.root_module.addImport("neuro", neuro_dep.module("neuro"));
-    exe.root_module.addImport("zag", zag_dep.module("zag"));
+    exe_mod.addImport("neuro", neuro_dep.module("neuro"));
+    exe_mod.addImport("zag", zag_dep.module("zag"));
+
+    const exe = b.addExecutable(.{
+        .name = full_name,
+        .root_module = exe_mod,
+    });
     return exe;
 }

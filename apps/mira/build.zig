@@ -8,7 +8,7 @@ pub fn build(b: *std.Build) void {
     const zag_dep = b.dependency("zag", .{ .target = target, .optimize = optimize });
 
     const exe_mod = b.createModule(.{
-        .root_source_file = b.path("src/grimoire.zig"),
+        .root_source_file = b.path("src/mira.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -16,7 +16,7 @@ pub fn build(b: *std.Build) void {
     exe_mod.addImport("zag", zag_dep.module("zag"));
 
     const exe = b.addExecutable(.{
-        .name = "grimoire",
+        .name = "mira",
         .root_module = exe_mod,
     });
     b.installArtifact(exe);
@@ -27,6 +27,6 @@ pub fn build(b: *std.Build) void {
     } else {
         run.addPassthruArgs();
     }
-    const run_step = b.step("run", "Run grimoire");
+    const run_step = b.step("run", "Run mira");
     run_step.dependOn(&run.step);
 }

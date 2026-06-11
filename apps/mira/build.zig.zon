@@ -1,7 +1,7 @@
 .{
-    .name = .grimoire,
+    .name = .mira,
     .version = "0.1.0",
-    .fingerprint = 0x8e30c3fea5c4752c,
+    .fingerprint = 0x88b24ad7a0fe83b4,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .neuro = .{ .path = "../../packages/neuro" },

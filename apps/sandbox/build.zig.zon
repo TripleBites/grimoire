@@ -1,0 +1,15 @@
+.{
+    .name = .sandbox,
+    .version = "0.1.0",
+    .fingerprint = 0xe6eaf16792e27bee,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .neuro = .{ .path = "../../packages/neuro" },
+        .zag = .{ .path = "../../packages/zag" },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

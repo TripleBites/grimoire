@@ -1,7 +1,8 @@
 .{
-    .name = "zag",
+    .name = .zag,
     .version = "0.1.0",
-    .minimum_zig_version = "0.14.0",
+    .fingerprint = 0x9179a890bec4842,
+    .minimum_zig_version = "0.16.0",
     .dependencies = .{},
-    .paths = .{""},
+    .paths = .{ "" },
 }

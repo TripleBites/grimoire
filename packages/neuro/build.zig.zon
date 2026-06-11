@@ -1,7 +1,8 @@
 .{
-    .name = "neuro",
+    .name = .neuro,
     .version = "0.1.0",
-    .minimum_zig_version = "0.14.0",
+    .fingerprint = 0x7ee6f4064ccc9d36,
+    .minimum_zig_version = "0.16.0",
     .dependencies = .{},
-    .paths = .{""},
+    .paths = .{ "" },
 }
