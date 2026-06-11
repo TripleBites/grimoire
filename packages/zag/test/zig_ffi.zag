@@ -1,0 +1,4 @@
+(zig/extern printf "fn printf([*c]const u8, ...) c_int")
+
+(defn main []
+  (printf "Hello from Zig FFI!\n"))

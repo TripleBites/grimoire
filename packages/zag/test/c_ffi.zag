@@ -1,0 +1,4 @@
+(c/import "stdio.h")
+
+(defn main []
+  (c/printf "Hello from C FFI!\n"))

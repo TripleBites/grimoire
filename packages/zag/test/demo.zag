@@ -1,0 +1,10 @@
+; A simple zag demo
+
+(defn square [x]
+  (* x x))
+
+(defn main []
+  (let [a 5
+        b 10]
+    (print "Square of" a "is" (square a))
+    (print "Sum is" (+ a b))))
