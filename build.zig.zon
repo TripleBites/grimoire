@@ -5,7 +5,8 @@
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .neuro = .{ .path = "packages/neuro" },
-        .zag = .{ .path = "packages/zag" },
+        .grimoire_lang = .{ .path = "packages/grimoire-lang" },
+        .llama = .{ .path = "packages/llama" },
     },
     .paths = .{
         "build.zig",

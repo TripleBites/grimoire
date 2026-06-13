@@ -1,0 +1,15 @@
+.{
+    .name = .merlin,
+    .version = "0.1.0",
+    .fingerprint = 0xcab483f88b3657aa,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .neuro = .{ .path = "../../packages/neuro" },
+        .grimoire_lang = .{ .path = "../../packages/grimoire-lang" },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}

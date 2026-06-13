@@ -1,0 +1,7 @@
+(ns math.lib)
+
+(defn add-two [x]
+  (+ x 2))
+
+(defn square [x]
+  (* x x))

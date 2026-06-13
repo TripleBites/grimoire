@@ -1,11 +1,10 @@
 .{
     .name = .mira,
     .version = "0.1.0",
-    .fingerprint = 0x88b24ad7a0fe83b4,
+    .fingerprint = 0x88b24ad73ccc204f,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
-        .neuro = .{ .path = "../../packages/neuro" },
-        .zag = .{ .path = "../../packages/zag" },
+        .llama = .{ .path = "../../packages/llama" },
     },
     .paths = .{
         "build.zig",

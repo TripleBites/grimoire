@@ -1,0 +1,6 @@
+(ns level.b)
+
+(require [level_a :as a])
+
+(defn double-answer []
+  (+ a/answer a/answer))

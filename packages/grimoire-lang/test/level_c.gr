@@ -1,0 +1,6 @@
+(ns level.c)
+
+(require [level_b :as b])
+
+(defn main []
+  (print (b/double-answer)))
