@@ -26,12 +26,15 @@ I have preemptively organized things:
 
 # Requirements:
 1. Must include a side task of building merlin! our own custom AI agent designed to work in grimoire. Possible architectures include:
-    a. Bonsai Ternary Neural Networks.
+    a. Integration with jupyter notebook code and markdown blocks. Add Prompts code block to jyupter notebook. And a diagramming block using mermaid or draw.io.
     b. RWKV
     c. Mamba SSM
     d. Real Time Learning
     e. Reservoir computing
-    f. Integration with jupyter notebook code and markdown blocks. Add Prompts code block to jyupter notebook. And a diagramming block using mermaid or draw.io.
+    f. Bonsai Ternary Neural Networks
+    g. Spiking Neural Networks (SNN)
+    h. Hyperdimensional computing (HDC)
+
 
 # new jupyter notebook cells
 1. Some sort of natural integration with mermaid or draw.io or another drawing stack that we can use to show both humans and ai diagrams.
@@ -73,6 +76,12 @@ I have preemptively organized things:
 9. Linux
 10. Remote SSH target i.MX 6 running Yocto Linux (Kernel Interface)
 
+# Libraries
+1. Numpy
+2. Jupylet vs alternatives???
+3. sympy vs pysys???
+4. matplotlib
+5. ipykernel
 
 # 5andbox
 We want to use use our new Jupyter Notebook kernel interface as our sandboxing tool output to the world. We want them to be easy to configure the permissions. I should be able to run it safely at my work on very secure and sandboxed credit card payment industry. Where we need absolute security and ability to lock down an environment.
