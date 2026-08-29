@@ -1,0 +1,2 @@
+Question 8/29/2026:
+- [ ] How do LLM's see punctuation, syntax, capital letters, punctuation. Unicode vs ASCII. How can we optimize performance vs expression. Of human input and AI input, and human output and AI output. How can we optimize computer code syntax, language, and tokenization, to better improve our communication with AI systems. And there own processing of it.

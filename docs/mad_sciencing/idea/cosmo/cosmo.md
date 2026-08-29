@@ -1,0 +1,2 @@
+# Cosmo
+We want to build a small robot like https://github.com/dorianborian/sesame-robot/. And teach it to walk on its four legs. And then teach it to fly as a drone one day. I want it be able to utilize its feat as drone propellers and feat. Then we will teach an AI to fly it and pilot it. On land and in the sky.
