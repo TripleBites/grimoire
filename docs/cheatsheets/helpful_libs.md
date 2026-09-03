@@ -18,3 +18,10 @@ Instead of jumping into PyTorch, these lightweight frameworks let you study how 
 - **matplotlib:** Essential for plotting loss curves, decision boundaries, visual activation functions, and tracking convergence directly in your Jupyter notebooks on mobile or desktop.
 
 - **tqdm:** A lightweight, pure-Python progress bar wrapper that works in terminal sessions and Jupyter notebooks without adding overhead to training loops.
+
+## For Grimoire Specifically
+- LangGraph
+- Langchain
+- wasmtime-py
+- pywasm
+- RestrictedPython
