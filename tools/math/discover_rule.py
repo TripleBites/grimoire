@@ -24,6 +24,11 @@ def synthesize_learning_rule():
     print("--- Phase 1: Synthesizing the Rule with Z3 ---")
     
     # We want to discover a learning rule: w_new = f(w, x, e)
+    # 
+    # w = current weight (internal state)
+    # x = current input (data signal)
+    # e = error / feedback signal (teaching signal)
+    #
     # A 3-input boolean function can be entirely represented by an 8-bit Lookup Table (LUT).
     # We ask Z3 to find the exact 8 bits for this LUT that satisfy our error constraints.
     LUT = z3.BitVec('LUT', 8)
