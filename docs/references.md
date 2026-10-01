@@ -1,5 +1,8 @@
-# References
-
+```text
+┏━┓┏━╸┏━╸┏━╸┏━┓┏━╸┏┓╻┏━╸┏━╸┏━┓
+┣┳┛┣╸ ┣╸ ┣╸ ┣┳┛┣╸ ┃┗┫┃  ┣╸ ┗━┓
+╹┗╸┗━╸╹  ┗━╸╹┗╸┗━╸╹ ╹┗━╸┗━╸┗━┛
+```
 ### 1. Conceptual & Architectural Deep Dives (BitNet & Ternary Weights)
 
 * **[The Myth of 1-bit LLMs | Quantization-Aware Training](https://www.youtube.com/watch?v=WBm0nyDkVYM&utm_source=gemini) — Julia Turc**
