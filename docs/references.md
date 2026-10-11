@@ -53,3 +53,7 @@
 * **[1-bit LLMs & BitNet b1.58 Overview](https://www.youtube.com/watch?v=3QbzMHCZvjY&utm_source=gemini)**
 * **Length:** ~15 min (Audio / Podcast format)
 * **Focus:** Discusses the systems-level impact of ternary computing, CPU-side kernel acceleration (`bitnet.cpp`), and why hardware hardware-software co-design makes ternary models significantly faster than standard INT8 or FP16 models.
+
+### 5. Dust: Pretraining Transformers Without Backpropagation
+
+https://qlabs.sh/research/dust
