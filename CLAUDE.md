@@ -38,7 +38,7 @@ scripts. The full project spec is imported below; follow it exactly.
 - Names: `PascalCase` classes and structs, `snake_case` methods, members and
   functions. Free functions are prefixed by their module (`plat_alloc`,
   `grimoire_register`).
-- Functions stay under about 40 lines. If one grows past that, split it.
+- Keep clear human readable comments around code that is not trivial.
 
 ## Build and run
 
