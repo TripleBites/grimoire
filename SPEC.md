@@ -1,4 +1,4 @@
-# Merlin MVP spec: Top (ternary Bop) on MNIST
+# Grimoire MVP spec: Top (ternary Bop) on MNIST
 
 ## 1. Goal
 
@@ -38,8 +38,30 @@ If a result looks bad, report it (section 10). Do not add machinery to fix it.
 
 ## 4. Layout
 
-Existing files in `src/` may be stubs or partial work. Read them first, keep
-what fits this spec, and ask before deleting anything substantial.
+Files marked with a milestone do not exist yet; that milestone creates them.
+
+```
+CMakeLists.txt                  sources are listed by hand, no globs
+src/core/main.cpp               entry point, --selftest (M2), SDL and Janet init
+src/core/platform.hpp     (M2)  plat_alloc / plat_free (64-byte aligned), over SDL3
+src/core/bind.cpp         (M3)  all Janet natives
+src/core/mnist.hpp        (M3)  Mnist, IDX loader
+src/core/viz.hpp          (M6)  debug window
+src/core/tnn/trit.hpp     (M2)  Trits
+src/core/tnn/tnn.hpp      (M3)  Net, Layer, forward pass
+src/core/tnn/optimizer.hpp (M4) Top
+src/lib/grimoire/hello.janet      M1 import check
+src/lib/grimoire/tnn.janet  (M5)  save and load
+src/nets/mnist-mlp.janet        network spec
+src/scripts/hello.janet         M1 boot check
+src/scripts/train-mnist.janet   the experiment
+src/vendor/janet/               janet.c, janet.h (built as a separate library)
+data/mnist/                     the four IDX files
+ckpt/                           saved networks (git-ignored)
+```
+
+Everything runs from the repo root. `src/lib/` is Janet's module root, so
+`(import grimoire/tnn)` loads `src/lib/grimoire/tnn.janet`.
 
 - **Budget: under 1,000 lines of C++ and under 100 lines of Janet in total**,
   excluding `vendor/`. If a milestone would break the budget, stop and say so.
@@ -49,30 +71,35 @@ what fits this spec, and ask before deleting anything substantial.
 Two bitplanes, one row per vector, each row padded to whole 64-bit words.
 
 ```cpp
-struct Trits {
-    uint64_t *mask;    // bit = 1: trit is nonzero
-    uint64_t *sign;    // bit = 1: trit is -1 (only where mask = 1)
-    uint32_t  rows, cols;
-    uint32_t  stride;  // 64-bit words per row = (cols + 63) / 64
+class Trits {
+public:
+    Trits() {}
+    ~Trits() { free(); }
+    Trits(const Trits &) = delete;
+    Trits &operator=(const Trits &) = delete;
+
+    bool init(uint32_t rows, uint32_t cols);   // zeroed, 64-byte aligned
+    void free();                               // safe to call twice
+    int  get(uint32_t r, uint32_t c) const;    // returns -1, 0 or +1
+    void set(uint32_t r, uint32_t c, int v);
+    int  dot(uint32_t ra, const Trits &b, uint32_t rb) const;
+
+    uint64_t *mask = nullptr;  // bit = 1: trit is nonzero
+    uint64_t *sign = nullptr;  // bit = 1: trit is -1 (only where mask = 1)
+    uint32_t  rows = 0, cols = 0;
+    uint32_t  stride = 0;      // 64-bit words per row = (cols + 63) / 64
 };
 ```
+
+Data members are public: the optimizer and the selftest read the bitplanes
+directly, and getters would only add lines.
 
 Invariants, checked by the selftest:
 
 1. Where a `mask` bit is 0, the `sign` bit is 0.
 2. Padding bits past `cols` are 0 in both planes.
 
-Functions (free functions, no methods):
-
-```cpp
-bool trits_init(Trits *t, uint32_t rows, uint32_t cols);  // zeroed, 64-byte aligned
-void trits_free(Trits *t);
-int  trits_get(const Trits *t, uint32_t r, uint32_t c);   // returns -1, 0 or +1
-void trits_set(Trits *t, uint32_t r, uint32_t c, int v);
-int  trits_dot(const Trits *a, uint32_t ra, const Trits *b, uint32_t rb);
-```
-
-`trits_dot` over the words of the two rows:
+`Trits::dot` over the words of the two rows:
 
 ```
 nz   = a.mask & b.mask
@@ -98,8 +125,19 @@ struct Layer {
     float theta;   // activation threshold in units of s (hidden layers only)
     int   delta;   // integer threshold = round(theta * s)
 };
-struct Net { Layer *layers; uint32_t n_layers; uint32_t n_in; };
+class Net {
+public:
+    // same rules as Trits: empty constructor, bool init(...), free(),
+    // destructor calls free(), copying deleted
+    Layer   *layers = nullptr;
+    uint32_t n_layers = 0, n_in = 0;
+    // plus the z / x scratch buffers and forward() / predict()
+};
 ```
+
+`Layer` stays a plain struct: it owns nothing beyond its `Trits`, which frees
+itself. Allocate the layer array with `plat_alloc` and placement `new`, and
+call `~Layer()` before `plat_free`.
 
 Input encoding (in the MNIST loader): pixel >= 128 becomes +1, otherwise -1.
 
@@ -108,7 +146,7 @@ Forward pass for one sample, integers only:
 ```
 x[0] = input row
 for each layer l:
-    z[j] = trits_dot(W_l row j, x[l-1])
+    z[j] = W_l.dot(j, x[l-1], 0)
     hidden layer:  x[l][j] = +1 if z[j] >  delta
                              -1 if z[j] < -delta
                               0 otherwise
@@ -178,12 +216,33 @@ tune them (section 9, milestone 4).
 
 ### 7.3 Interface
 
+`Mnist` and `Top` follow the same class rules as `Trits`.
+
 ```cpp
 struct TrainStats { double loss_sum; uint32_t correct; uint32_t n; uint32_t *flips; };
-void top_train(Top *opt, const Mnist *data, uint32_t first, uint32_t count, TrainStats *out);
+class Mnist {                  // in mnist.hpp
+public:
+    bool load(const char *images_path, const char *labels_path);
+    void free();
+    Trits    images;           // one row per image
+    uint8_t *labels = nullptr;
+    uint32_t n = 0;
+};
+class Top {                    // in optimizer.hpp
+public:
+    bool init(Net *net, float gamma, const float *tau, uint32_t batch);
+    void free();
+    void train(const Mnist &data, uint32_t first, uint32_t count, TrainStats *out);
+    Net     *net = nullptr;    // not owned
+    float    gamma = 0;
+    float   *tau = nullptr;    // one per layer
+    uint32_t batch = 0;
+    float  **G = nullptr;      // per layer, out * in
+    float  **m = nullptr;      // per layer, out * in, starts at 0
+};
 ```
 
-Trains on samples `[first, first + count)` in order, clamped to the end of the
+`Top::train` trains on samples `[first, first + count)` in order, clamped to the end of the
 dataset. The last batch may be short. No shuffling.
 
 Write the obvious loops first. One permitted shortcut: unpack the input row
@@ -193,11 +252,11 @@ wait.
 
 ## 8. Janet API
 
-`main.cpp`: `merlin <script.janet>` runs the script; `merlin --selftest` runs
-the checks. It initializes SDL and Janet, calls `merlin_register`, makes
-`(import merlin/tnn)` resolve to `./janet/merlin/tnn.janet` (run from the repo
-root), and runs the script through Janet's own `dofile` so relative imports
-work.
+`main.cpp`: `grimoire <script.janet>` runs the script; `grimoire --selftest` runs
+the checks. It initializes SDL and Janet, calls `grimoire_register` (from M3),
+sets Janet's `:syspath` to `src/lib` so `(import grimoire/tnn)` resolves to
+`src/lib/grimoire/tnn.janet` (run from the repo root), and runs the script
+through Janet's own `dofile` so relative imports work.
 
 Natives, all in `bind.cpp`:
 
@@ -216,15 +275,16 @@ Natives, all in `bind.cpp`:
 
 Binding rules:
 
-- Net, dataset and optimizer are Janet abstract types holding plain structs,
-  each with a `gc` finalizer that frees them.
+- Net, dataset and optimizer are Janet abstract types. The object lives in
+  the abstract's memory, constructed with placement `new`; the `gc`
+  finalizer calls its destructor.
 - The optimizer holds a pointer to its net and must mark it in `gcmark`.
 - Janet panics are `longjmp`. The argument getters panic on bad input, so read
   and validate every argument before allocating anything.
 - Natives use the prefixes `mnist/`, `tnn/`, `top/`. The Janet module
-  `merlin/tnn` also imports as `tnn/`; do not reuse a name on both sides.
+  `grimoire/tnn` also imports as `tnn/`; do not reuse a name on both sides.
 
-The network spec, `nets/mnist-mlp.janet`. The last layer is always the linear
+The network spec, `src/nets/mnist-mlp.janet`. The last layer is always the linear
 output; every other layer is ternary.
 
 ```janet
@@ -234,7 +294,7 @@ output; every other layer is ternary.
             {:out 10}]})
 ```
 
-Save and load live in `janet/merlin/tnn.janet`, built from `tnn/layers`,
+Save and load live in `src/lib/grimoire/tnn.janet`, built from `tnn/layers`,
 `tnn/row` and `tnn/set-row`. `load` uses `parse`, never `eval`. File format:
 
 ```janet
@@ -244,10 +304,10 @@ Save and load live in `janet/merlin/tnn.janet`, built from `tnn/layers`,
           {:out 10 :rows ["..."]}]}
 ```
 
-The experiment, `scripts/train-mnist.janet`, should read close to this:
+The experiment, `src/scripts/train-mnist.janet`, should read close to this:
 
 ```janet
-(import merlin/tnn)
+(import grimoire/tnn)
 (import ../nets/mnist-mlp :as arch)
 
 (def train (mnist/load "data/mnist/train-images-idx3-ubyte" "data/mnist/train-labels-idx1-ubyte"))
@@ -272,13 +332,13 @@ Do one milestone per request, then stop and report.
 **M0. Read and plan.** Read the existing files. Report what is there, what you
 would keep, and anything in this spec that conflicts with it. Write no code.
 
-**M1. Build and boot.** CMake builds Janet, links SDL3, produces `merlin`.
-`scripts/hello.janet` prints a line and imports a one-function module from
-`janet/merlin/`.
+**M1. Build and boot.** CMake builds Janet, links SDL3, produces `grimoire`.
+`src/scripts/hello.janet` prints a line and imports a one-function module,
+`src/lib/grimoire/hello.janet`.
 *Check:* the script's output.
 
-**M2. Trits.** `trit.hpp`, `platform.hpp`, and `merlin --selftest`.
-*Check:* `trits_dot` matches a naive per-element loop on random rows for
+**M2. Trits.** `trit.hpp`, `platform.hpp`, and `grimoire --selftest`.
+*Check:* `Trits::dot` matches a naive per-element loop on random rows for
 `cols` in {1, 63, 64, 65, 784}; get/set round-trips; both invariants hold.
 
 **M3. Data and forward pass.** `mnist.hpp`, `tnn.hpp`, and the natives
@@ -293,7 +353,7 @@ shows roughly one third each of -1, 0, +1.
 2. Overfit: train repeatedly on the first 256 samples. Training accuracy
    should climb toward 100%. If it does not, that is a bug or a broken rule;
    find out which before going on.
-3. Full run: 10 epochs with `scripts/train-mnist.janet`.
+3. Full run: 10 epochs with `src/scripts/train-mnist.janet`.
 
 Target for the full run: 90% test accuracy or better. This is a research
 question, so the target may not be reachable. You may tune only `gamma`,
@@ -303,7 +363,7 @@ per batch is following noise (raise its `tau`); a layer with no steps is frozen
 (lower it). Report every run in a table.
 
 **M5. Save and load.** `tnn/layers`, `tnn/row`, `tnn/set-row`, and
-`janet/merlin/tnn.janet`.
+`src/lib/grimoire/tnn.janet`.
 *Check:* save, load into a fresh net, and get the identical test accuracy;
 saving the loaded net produces a byte-identical file.
 

@@ -1,4 +1,4 @@
-# merlin
+# grimoire
 
 A small C++11 program that trains a ternary neural network, driven by Janet
 scripts. The full project spec is imported below; follow it exactly.
@@ -16,17 +16,28 @@ scripts. The full project spec is imported below; follow it exactly.
 
 ## Code rules
 
-- C++11 only. No use of virtual functions or exceptons. When logging or printing debug information, or using OS tools. Always default to using SDL3. It is our platfrom layer so we can be platform independent.
-  pointers, `std::function`, lambdas stored in variables, or iostreams.
-- No STL containers inside structs. Allocate with `plat_alloc`, free with
-  `plat_free`, and pair every `*_init` with a `*_free`.
+- C++11 only. Classes are welcome; no inheritance, virtual functions,
+  exceptions, RTTI, function pointers, `std::function`, lambdas stored in
+  variables, or iostreams.
+- Classes that own memory follow one pattern: an empty constructor,
+  `bool init(...)` that allocates and returns false on failure, `free()` that
+  is safe to call twice, a destructor that calls `free()`, and copying
+  deleted. Constructors never allocate, because without exceptions they
+  cannot report failure.
+- No STL containers inside classes or structs. Allocate with `plat_alloc`,
+  free with `plat_free` (64-byte aligned, over SDL3).
+- SDL3 is the platform layer: use it for logging (`SDL_Log`), allocation and
+  any OS calls, so the code stays platform independent.
+- Keep hot loops fast: contiguous arrays, no allocation per sample, no
+  branches inside word loops. Measure before optimizing anything else.
 - No new dependencies and no new files beyond the layout in SPEC section 4.
 - No speculative code: no unused parameters, options, hooks or abstractions
   "for later".
 - Each file starts with a 3 to 5 line comment saying what it is for. Other
   comments explain why, not what.
-- Names: `snake_case` functions prefixed by their module (`trits_dot`,
-  `net_forward`, `top_train`), `PascalCase` structs.
+- Names: `PascalCase` classes and structs, `snake_case` methods, members and
+  functions. Free functions are prefixed by their module (`plat_alloc`,
+  `grimoire_register`).
 - Functions stay under about 40 lines. If one grows past that, split it.
 
 ## Build and run
@@ -34,9 +45,11 @@ scripts. The full project spec is imported below; follow it exactly.
 ```
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-./build/merlin --selftest
-./build/merlin scripts/train-mnist.janet
+./build/grimoire src/scripts/hello.janet
+./build/grimoire --selftest                      # from M2
+./build/grimoire src/scripts/train-mnist.janet   # from M4
 ```
 
-Run from the repo root. Compile your own code with `-Wall -Wextra` and leave
-no warnings.
+Run from the repo root. Our code builds with `-Wall -Wextra` and must have no
+warnings (the vendored Janet is a separate target without them). New source
+files must be added to `CMakeLists.txt` by hand.

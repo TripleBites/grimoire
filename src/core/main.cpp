@@ -1,46 +1,45 @@
+// Entry point: `grimoire <script.janet>` starts SDL and Janet and runs the
+// script. Janet's module root is set to src/lib so `(import grimoire/x)` finds
+// src/lib/grimoire/x.janet. Run from the repo root.
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include <string>
-#include <iostream>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include <bit>
-#include <cstdlib>
+#include "janet.h"
 
-extern "C" {
-#include "janet/janet.h"
+// Calls Janet's own dofile, rather than reading the file ourselves, so the
+// script gets :current-file and its relative imports work.
+static int grimoire_run_script(JanetTable *env, const char *path)
+{
+    Janet dofile;
+    janet_resolve(env, janet_csymbol("dofile"), &dofile);
+    Janet arg = janet_cstringv(path);
+    JanetFiber *fiber = NULL;
+    Janet out;
+    JanetSignal sig = janet_pcall(janet_unwrap_function(dofile), 1, &arg, &out, &fiber);
+    if (sig != JANET_SIGNAL_OK) {
+        janet_stacktrace(fiber, out);
+        return 1;
+    }
+    return 0;
 }
 
-#include "tnn.hpp"
-
-int main()
+int main(int argc, char *argv[])
 {
-    SDL_Log( "Hello, Merlin!\n" );
-
-    // Initialize the Janet VM state and garbage collector
-    janet_init();
-
-    // Get the core environment table with built-in functions (+, print, def, etc.)
-    JanetTable *env = janet_core_env(NULL);
-
-    // Evaluate a Janet code string
-    Janet result;
-    const char *script = "(+ 10 20 30 40 50 60)";
-    int status = janet_dostring(env, script, "main.janet", &result);
-
-    if (status == 0) {
-        // janet_description turns any Janet value into a readable C-string
-        const uint8_t *output = janet_description(result);
-        std::cout << "Janet returned: " << output << std::endl; // Output: 60
-    } else {
-        std::cerr << "Failed to evaluate script." << std::endl;
+    if (argc != 2) {
+        SDL_Log("usage: grimoire <script.janet>");
+        return 1;
     }
+    if (!SDL_Init(0)) {
+        SDL_Log("SDL_Init failed: %s", SDL_GetError());
+        return 1;
+    }
+    janet_init();
+    JanetTable *env = janet_core_env(NULL);
+    janet_table_put(env, janet_ckeywordv("syspath"), janet_cstringv("src/lib"));
 
-    // Free VM resources
+    int rc = grimoire_run_script(env, argv[1]);
+
     janet_deinit();
-
-    return 0;
+    SDL_Quit();
+    return rc;
 }

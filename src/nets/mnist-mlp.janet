@@ -1,7 +1,7 @@
-(import merlin/tnn)
+# The MNIST network spec (SPEC section 8). The last layer is the linear
+# output; every other layer is ternary with activation threshold :theta.
 
 (def spec
-  (tnn/net :name "mnist-mlp"
-    (tnn/input 784 :encode [:threshold 128])
-    (tnn/dense 512 :act :ternary)
-    (tnn/dense 10  :act :linear)))
+  {:input 784
+   :layers [{:out 512 :theta 0.5}
+            {:out 10}]})
