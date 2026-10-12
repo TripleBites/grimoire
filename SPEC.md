@@ -2,8 +2,7 @@
 
 ## 1. Goal
 
-Answer one question: **does Top, a ternary variant of the Bop optimizer, train a
-fully ternary MLP on MNIST?**
+Answer one question: **does Top, a ternary variant of the Bop optimizer, train a fully ternary MLP on MNIST?**
 
 Everything else in this spec is the minimum scaffolding needed to ask that
 question from a Janet script. The owner will extend the project by hand

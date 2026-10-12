@@ -13,6 +13,9 @@ endif()
 find_package(SDL3 REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
+add_subdirectory(src/vendor/imgui)
+add_subdirectory(src/vendor/implot)
+
 # Janet is its own target so our warning flags don't apply to vendored code.
 add_library(janet STATIC src/vendor/janet/janet.c)
 target_include_directories(janet PUBLIC src/vendor/janet)
@@ -26,7 +29,11 @@ add_executable(grimoire
 )
 target_include_directories(grimoire PRIVATE src/core)
 target_compile_options(grimoire PRIVATE -Wall -Wextra)
-target_link_libraries(grimoire PRIVATE janet SDL3::SDL3)
+target_link_libraries(grimoire PRIVATE
+  janet
+  SDL3::SDL3
+  imgui
+)
 
 # Without a native target, __builtin_popcountll compiles to a slow bit trick
 # instead of the POPCNT instruction, and Trits::dot is the hot loop.
