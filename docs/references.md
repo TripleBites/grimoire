@@ -57,3 +57,7 @@
 ### 5. Dust: Pretraining Transformers Without Backpropagation
 
 https://qlabs.sh/research/dust
+
+### 6. Tsetlin Machine
+https://tsetlinmachine.org/
+https://github.com/cair/TsetlinMachineBook
