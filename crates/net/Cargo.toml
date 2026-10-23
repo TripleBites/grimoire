@@ -1,0 +1,8 @@
+[package]
+name = "rulelab-net"
+description = "rulelab: dtypes, quantizers, aggregations, wiring, layers and the step loop (M1)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]

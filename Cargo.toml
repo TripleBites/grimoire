@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+# The viewer (crates/viewer, added at M6) stays out of default-members so
+# `cargo build` and `cargo test` never pull in its web toolchain.
+default-members = [
+    "crates/vm",
+    "crates/net",
+    "crates/tasks",
+    "crates/metrics",
+    "crates/io",
+    "crates/search",
+    "crates/cli",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+rulelab-vm = { path = "crates/vm" }
+clap = { version = "4", features = ["derive"] }
