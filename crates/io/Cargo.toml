@@ -1,0 +1,8 @@
+[package]
+name = "rulelab-io"
+description = "rulelab: spec TOML parsing, sweep expansion, results JSONL, snapshots (M3)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]

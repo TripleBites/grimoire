@@ -1,0 +1,8 @@
+[package]
+name = "rulelab-search"
+description = "rulelab: enumerator, evolver and behavioral dedupe (M4, M5)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]

@@ -1,0 +1,14 @@
+[package]
+name = "rulelab"
+description = "rulelab: command line interface"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "rulelab"
+path = "src/main.rs"
+
+[dependencies]
+rulelab-vm.workspace = true
+clap.workspace = true
