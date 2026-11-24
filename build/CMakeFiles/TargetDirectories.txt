@@ -1,0 +1,3 @@
+/home/bpeng/code/grimoire/build/CMakeFiles/merlin.dir
+/home/bpeng/code/grimoire/build/CMakeFiles/edit_cache.dir
+/home/bpeng/code/grimoire/build/CMakeFiles/rebuild_cache.dir
